@@ -1,7 +1,7 @@
 [
   {
     "nama": "RSUD R. Syamsudin, S.H.",
-    "loc": [-6.91963, 106.92765],
+    "loc": [-6.915092491474739, 106.9351670681008],
     "kelas": "Kelas B (Pendidikan)",
     "kapasitas": "±566 Bed",
     "status": "Rujukan Utama & BLUD",
@@ -9,7 +9,7 @@
   },
   {
     "nama": "RS Islam Assyifa",
-    "loc": [-6.91575, 106.9324],
+    "loc": [-6.919089475293771, 106.91686097989904],
     "kelas": "Kelas C",
     "kapasitas": "±180 Bed",
     "status": "RS Swasta Terakreditasi",
@@ -17,7 +17,7 @@
   },
   {
     "nama": "RS Bhayangkara Setukpa",
-    "loc": [-6.9123, 106.9231],
+    "loc": [-6.912012835327467, 106.92250905460781],
     "kelas": "Kelas C",
     "kapasitas": "±88 Bed",
     "status": "RS Kepolisian",
@@ -25,7 +25,7 @@
   },
   {
     "nama": "RSUD Al-Mulk",
-    "loc": [-6.945, 106.93],
+    "loc": [-6.958589393012751, 106.89769546810102],
     "kelas": "Kelas D",
     "kapasitas": "±50 Bed",
     "status": "RSUD Kota (Gratis KTP)",
@@ -33,7 +33,7 @@
   },
   {
     "nama": "RS Kartika Kasih",
-    "loc": [-6.9235, 106.9298],
+    "loc": [-6.921993442413942, 106.92384922577233],
     "kelas": "Kelas C",
     "kapasitas": "±97 Bed",
     "status": "RS Swasta (Kasih Group)",
@@ -41,7 +41,7 @@
   },
   {
     "nama": "RS Hermina Sukabumi",
-    "loc": [-6.932, 106.955],
+    "loc": [-6.9178206379546605, 106.9614881122792],
     "kelas": "Kelas C",
     "kapasitas": "±154 Bed",
     "status": "RS Swasta Rujukan",

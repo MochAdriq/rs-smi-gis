@@ -165,3 +165,83 @@ h3 {
     transform: translateX(0);
   }
 }
+
+/* Styling Label Kecamatan saat Hover */
+.leaflet-tooltip.kec-tooltip {
+  background-color: rgba(0, 0, 0, 0.8);
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 4px;
+  padding: 5px 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Hilangkan panah tooltip bawaan leaflet biar rapi */
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+  display: none;
+}
+
+/* --- WIDGET CUACA BARU --- */
+.weather-widget {
+  background: linear-gradient(to bottom right, #3498db, #2980b9);
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.w-location {
+  font-size: 0.9em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 5px;
+}
+
+.w-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.w-main img {
+  width: 60px;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+}
+
+.big-temp {
+  font-size: 2.5em;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.desc-text {
+  font-size: 0.85em;
+  opacity: 0.9;
+  text-transform: capitalize;
+}
+
+.w-details {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9em;
+}
+
+.detail-item small {
+  font-size: 0.7em;
+  opacity: 0.7;
+}

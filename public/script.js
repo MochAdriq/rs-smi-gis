@@ -29,49 +29,100 @@ const overlayMaps = {}; // Nanti diisi otomatis saat data dimuat
 const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
 // Icon & Variables
-const ambIcon = L.icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/263/263058.png",
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
-});
+// --- KONFIGURASI ICON AMBULANS RANDOM ---
+
+// 1. Daftar nama file yang ada di folder public/assets
+const ambulanceImages = ["amb_1.svg", "amb_2.svg", "amb_3.svg"];
+
+// 2. Fungsi memilih icon secara acak
+function getRandomAmbIcon() {
+  const randomIndex = Math.floor(Math.random() * ambulanceImages.length);
+  const selectedImage = ambulanceImages[randomIndex];
+
+  return L.icon({
+    iconUrl: `/assets/${selectedImage}`, // Path ke folder assets
+    iconSize: [45, 45], // Ukuran ikon
+    iconAnchor: [22, 22], // Titik tengah
+  });
+}
+
 let allHospitals = [];
 let weatherApiKey = "";
 let isSimulationMode = false;
 let activeSimulations = [];
 
 // --- 2. FUNGSI LOAD SEMUA LAYER DATA ---
+// --- 2. FUNGSI LOAD SEMUA LAYER DATA ---
 async function loadLayerData() {
   // A. LAYER 1: KECAMATAN (Polygon) - Paling Bawah
-  // File: data/kecamatan.geojson
+  // (Fitur Hover / Sorot Interaktif)
+  // A. LAYER 1: KECAMATAN (Polygon) - Paling Bawah
   try {
     const resKec = await fetch("/data/kecamatan.geojson");
     if (resKec.ok) {
       const dataKec = await resKec.json();
 
-      // Style untuk Kecamatan (Warna Transparan)
       const kecStyle = {
-        color: "#f39c12", // Warna Garis (Oranye)
-        weight: 2, // Tebal Garis
+        color: "#f39c12",
+        weight: 2,
         opacity: 1,
-        fillColor: "#f1c40f", // Warna Isi (Kuning)
-        fillOpacity: 0.1, // Transparan banget biar peta kelihatan
+        fillColor: "#f1c40f",
+        fillOpacity: 0.1,
       };
 
       const layerKecamatan = L.geoJSON(dataKec, {
         style: kecStyle,
         onEachFeature: function (feature, layer) {
-          // Tampilkan Nama Kecamatan jika ada di properties
-          if (feature.properties && feature.properties.nama) {
-            layer.bindPopup(`<b>Kecamatan:</b> ${feature.properties.nama}`);
-          } else if (feature.properties && feature.properties.kecamatan) {
-            layer.bindPopup(
-              `<b>Kecamatan:</b> ${feature.properties.kecamatan}`
-            );
-          }
+          // 1. Ambil Data Nama & Populasi
+          const namaKec = feature.properties.nm_kecamatan || "Kecamatan";
+
+          // Ambil populasi, jika tidak ada tulis "0"
+          // Kita format angka biar ada titiknya (misal: 45.000)
+          const rawPop = feature.properties.populasi || 0;
+          const popFmt = rawPop.toLocaleString("id-ID");
+
+          // 2. Pasang Tooltip dengan HTML (Nama + Populasi)
+          // Kita pakai <br> untuk baris baru
+          layer.bindTooltip(
+            `
+                        <div style="text-align:center;">
+                            <b>${namaKec}</b><br>
+                            <small>👥 ${popFmt} Jiwa</small>
+                        </div>
+                    `,
+            {
+              permanent: false,
+              direction: "center",
+              className: "kec-tooltip",
+            }
+          );
+
+          // 3. Event Listener (Hover Effect)
+          layer.on({
+            mouseover: function (e) {
+              if (isSimulationMode) return;
+              const layer = e.target;
+              layer.setStyle({
+                weight: 3,
+                color: "#d35400",
+                fillOpacity: 0.5,
+                fillColor: "#e67e22",
+              });
+              layer.openTooltip();
+            },
+            mouseout: function (e) {
+              layerKecamatan.resetStyle(e.target);
+              layer.closeTooltip();
+            },
+            click: function (e) {
+              if (!isSimulationMode) {
+                map.fitBounds(e.target.getBounds());
+              }
+            },
+          });
         },
       });
 
-      // Tambahkan ke Peta & Layer Control
       layerKecamatan.addTo(map);
       layerControl.addOverlay(layerKecamatan, "Batas Kecamatan");
       console.log("✅ Layer Kecamatan dimuat.");
@@ -81,9 +132,8 @@ async function loadLayerData() {
   }
 
   // B. LAYER 2: JALAN RAYA (Line) - Di Atas Kecamatan
-  // File: data/jalan_raya.geojson (Format Baru)
   try {
-    const resJalan = await fetch("/data/jalan_raya.geojson"); // <--- Ekstensi .geojson
+    const resJalan = await fetch("/data/jalan_raya.geojson");
     if (resJalan.ok) {
       const dataJalan = await resJalan.json();
 
@@ -104,7 +154,6 @@ async function loadLayerData() {
   }
 
   // C. LAYER 3: RUMAH SAKIT (Point) - Paling Atas
-  // File: data/rumah_sakit.json (Tetap json karena ini data kita sendiri)
   try {
     const resRS = await fetch("/data/rumah_sakit.json");
     if (resRS.ok) {
@@ -231,7 +280,11 @@ async function getRouteAndAnimate(startLat, startLng, endLat, endLng, rsName) {
         dashArray: "10, 5",
       }).addTo(map);
 
-      const newMarker = L.marker(routeCoords[0], { icon: ambIcon }).addTo(map);
+      const randomIcon = getRandomAmbIcon();
+
+      const newMarker = L.marker(routeCoords[0], { icon: randomIcon }).addTo(
+        map
+      );
       newMarker
         .bindPopup(`<b>Unit #${simId}</b><br>Tujuan: ${rsName}`)
         .openPopup();
@@ -312,7 +365,6 @@ function animateMarker(marker, pathCoordinates, simData) {
   }, 50);
 }
 
-// --- 4. INTEGRASI CUACA ---
 async function fetchWeather() {
   try {
     const configRes = await fetch("/api/config");
@@ -321,24 +373,36 @@ async function fetchWeather() {
 
     if (!weatherApiKey) return;
 
+    // Koordinat Sukabumi (-6.9210, 106.9250)
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=-6.9210&lon=106.9250&appid=${weatherApiKey}&units=metric&lang=id`;
+
     const response = await fetch(url);
     const data = await response.json();
 
     if (data.cod === 200) {
-      const wBox = document.getElementById("weather-box");
-      if (wBox) {
-        wBox.style.display = "block";
-        document.getElementById("w-temp").innerText = Math.round(
-          data.main.temp
-        );
-        document.getElementById(
-          "w-desc"
-        ).innerText = `(${data.weather[0].description})`;
-      }
+      // 1. Lokasi (Nama Daerah)
+      // Kadang API balikin "Sukabumi", kadang nama kecamatan. Kita ambil saja.
+      document.getElementById("w-loc").innerText = data.name;
+
+      // 2. Suhu & Deskripsi
+      document.getElementById("w-temp").innerText =
+        Math.round(data.main.temp) + "°C";
+      document.getElementById("w-desc").innerText = data.weather[0].description;
+
+      // 3. Ikon Cuaca
+      const iconCode = data.weather[0].icon;
+      const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+      const iconImg = document.getElementById("w-icon");
+      iconImg.src = iconUrl;
+      iconImg.style.display = "block";
+
+      // 4. Detail Tambahan (Angin & Lembap)
+      document.getElementById("w-wind").innerText = data.wind.speed + " km/j";
+      document.getElementById("w-hum").innerText = data.main.humidity + "%";
     }
   } catch (e) {
     console.error("Cuaca error:", e);
+    document.getElementById("w-desc").innerText = "Gagal memuat cuaca";
   }
 }
 fetchWeather();
