@@ -1,0 +1,12 @@
+# Dependency (Sampah Berat)
+node_modules/
+
+# Environment Variables (Kunci Rahasia)
+.env
+
+# Database (Agar data simulasi tidak ikut ter-upload)
+database/*.db
+
+# Log System (Sampah OS)
+.DS_Store
+Thumbs.db

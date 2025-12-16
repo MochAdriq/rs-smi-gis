@@ -1,6 +1,6 @@
 /**
  * FILE: public/script.js
- * FUNGSI: Logika Frontend (Hanya Simulasi Klik User)
+ * UPDATE: Support file .geojson & Layering Kecamatan
  */
 
 // --- 1. SETUP PETA & GLOBAL VARIABLES ---
@@ -19,58 +19,131 @@ const topoLayer = L.tileLayer(
   }
 );
 
-L.control.layers({ "Peta Jalan": osmLayer, Topografi: topoLayer }).addTo(map);
+// Setup Layer Control (Menu Ganti Layer)
+// Kita simpan di variabel agar bisa menambah overlay secara dinamis nanti
+const baseMaps = {
+  "Peta Jalan (OSM)": osmLayer,
+  "Topografi (DEM)": topoLayer,
+};
+const overlayMaps = {}; // Nanti diisi otomatis saat data dimuat
+const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
-// Icon
+// Icon & Variables
 const ambIcon = L.icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/263/263058.png",
   iconSize: [40, 40],
   iconAnchor: [20, 20],
 });
-
 let allHospitals = [];
 let weatherApiKey = "";
 let isSimulationMode = false;
 let activeSimulations = [];
 
-// --- 2. LOAD DATA STATIS (Jalan & RS) ---
+// --- 2. FUNGSI LOAD SEMUA LAYER DATA ---
 async function loadLayerData() {
-  // Load Jalan Raya
+  // A. LAYER 1: KECAMATAN (Polygon) - Paling Bawah
+  // File: data/kecamatan.geojson
   try {
-    const resJalan = await fetch("/data/jalan_raya.json");
-    if (resJalan.ok) {
-      const dataJalan = await resJalan.json();
-      L.geoJSON(dataJalan, {
-        style: { color: "#7f8c8d", weight: 2, opacity: 0.5 },
-      }).addTo(map);
+    const resKec = await fetch("/data/kecamatan.geojson");
+    if (resKec.ok) {
+      const dataKec = await resKec.json();
+
+      // Style untuk Kecamatan (Warna Transparan)
+      const kecStyle = {
+        color: "#f39c12", // Warna Garis (Oranye)
+        weight: 2, // Tebal Garis
+        opacity: 1,
+        fillColor: "#f1c40f", // Warna Isi (Kuning)
+        fillOpacity: 0.1, // Transparan banget biar peta kelihatan
+      };
+
+      const layerKecamatan = L.geoJSON(dataKec, {
+        style: kecStyle,
+        onEachFeature: function (feature, layer) {
+          // Tampilkan Nama Kecamatan jika ada di properties
+          if (feature.properties && feature.properties.nama) {
+            layer.bindPopup(`<b>Kecamatan:</b> ${feature.properties.nama}`);
+          } else if (feature.properties && feature.properties.kecamatan) {
+            layer.bindPopup(
+              `<b>Kecamatan:</b> ${feature.properties.kecamatan}`
+            );
+          }
+        },
+      });
+
+      // Tambahkan ke Peta & Layer Control
+      layerKecamatan.addTo(map);
+      layerControl.addOverlay(layerKecamatan, "Batas Kecamatan");
+      console.log("✅ Layer Kecamatan dimuat.");
     }
   } catch (e) {
-    console.error("Skip jalan raya:", e);
+    console.error("Gagal load kecamatan:", e);
   }
 
-  // Load Rumah Sakit
+  // B. LAYER 2: JALAN RAYA (Line) - Di Atas Kecamatan
+  // File: data/jalan_raya.geojson (Format Baru)
+  try {
+    const resJalan = await fetch("/data/jalan_raya.geojson"); // <--- Ekstensi .geojson
+    if (resJalan.ok) {
+      const dataJalan = await resJalan.json();
+
+      const layerJalan = L.geoJSON(dataJalan, {
+        style: {
+          color: "#7f8c8d", // Abu-abu
+          weight: 2,
+          opacity: 0.6,
+        },
+      });
+
+      layerJalan.addTo(map);
+      layerControl.addOverlay(layerJalan, "Jaringan Jalan");
+      console.log("✅ Layer Jalan Raya dimuat.");
+    }
+  } catch (e) {
+    console.error("Gagal load jalan:", e);
+  }
+
+  // C. LAYER 3: RUMAH SAKIT (Point) - Paling Atas
+  // File: data/rumah_sakit.json (Tetap json karena ini data kita sendiri)
   try {
     const resRS = await fetch("/data/rumah_sakit.json");
     if (resRS.ok) {
       allHospitals = await resRS.json();
+
+      // Kita bungkus dalam LayerGroup agar bisa di on/off sekaligus
+      const groupRS = L.layerGroup();
+
       allHospitals.forEach((rs) => {
-        const marker = L.marker(rs.loc).addTo(map);
+        const marker = L.marker(rs.loc);
         marker.bindPopup(`<b>${rs.nama}</b><br>${rs.kelas}`);
-        L.circle(rs.loc, {
+
+        const circle = L.circle(rs.loc, {
           color: rs.color,
           fillColor: rs.color,
           fillOpacity: 0.1,
           radius: 1000,
-        }).addTo(map);
+        });
+
+        // Masukkan ke grup
+        marker.addTo(groupRS);
+        circle.addTo(groupRS);
       });
+
+      groupRS.addTo(map);
+      layerControl.addOverlay(groupRS, "Rumah Sakit");
+      console.log("✅ Layer RS dimuat.");
     }
   } catch (e) {
     console.error("Gagal load RS:", e);
   }
 }
+
+// Panggil Fungsi Load
 loadLayerData();
 
 // --- 3. FITUR SIMULASI ON-DEMAND (KLIK USER) ---
+// (Bagian ini tidak berubah, tetap sama seperti sebelumnya)
+
 function toggleSimulationMode() {
   isSimulationMode = !isSimulationMode;
   const btn = document.getElementById("btn-mode");
@@ -93,6 +166,10 @@ function clearSimulations() {
     map.removeLayer(sim.marker);
     map.removeLayer(sim.line);
     clearInterval(sim.timer);
+
+    // Hapus Kartu UI
+    const card = document.getElementById(`card-${sim.id}`);
+    if (card) card.remove();
   });
   activeSimulations = [];
   document.getElementById("btn-reset").style.display = "none";
@@ -130,6 +207,7 @@ function findNearestHospital(lat, lng) {
   return nearest;
 }
 
+// Logika Routing OSRM & UI Panel
 async function getRouteAndAnimate(startLat, startLng, endLat, endLng, rsName) {
   const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
 
@@ -142,13 +220,10 @@ async function getRouteAndAnimate(startLat, startLng, endLat, endLng, rsName) {
         c[1],
         c[0],
       ]);
-
-      // 1. Generate ID Unik & Warna Acak
-      const simId = Date.now(); // ID unik berdasarkan waktu
+      const simId = Date.now();
       const randomColor =
         "#" + Math.floor(Math.random() * 16777215).toString(16);
 
-      // 2. Gambar Garis Jalur
       const routeLine = L.polyline(routeCoords, {
         color: randomColor,
         weight: 5,
@@ -156,57 +231,48 @@ async function getRouteAndAnimate(startLat, startLng, endLat, endLng, rsName) {
         dashArray: "10, 5",
       }).addTo(map);
 
-      // 3. Buat Marker Ambulans
       const newMarker = L.marker(routeCoords[0], { icon: ambIcon }).addTo(map);
       newMarker
         .bindPopup(`<b>Unit #${simId}</b><br>Tujuan: ${rsName}`)
         .openPopup();
 
-      // 4. BUAT KARTU INFO DI UI (HTML)
       createAmbulanceCard(simId, rsName, randomColor);
 
-      // 5. Simpan Data Simulasi
       const simData = {
         id: simId,
         marker: newMarker,
         line: routeLine,
         timer: null,
-        destination: [endLat, endLng], // Simpan koordinat tujuan untuk hitung jarak
+        destination: [endLat, endLng],
       };
       activeSimulations.push(simData);
 
-      // 6. Jalankan Animasi
       animateMarker(newMarker, routeCoords, simData);
     }
   } catch (err) {
     console.error("Routing Error:", err);
   }
 }
+
 function createAmbulanceCard(id, rsName, color) {
   const container = document.getElementById("ambulance-list");
-
   const card = document.createElement("div");
-  card.id = `card-${id}`; // ID elemen HTML biar gampang dicari
+  card.id = `card-${id}`;
   card.className = "amb-card";
-  card.style.borderLeftColor = color; // Samakan warna border dengan jalur
+  card.style.borderLeftColor = color;
 
   card.innerHTML = `
-        <h4 style="color:${color}">🚑 Unit Darurat #${id
-    .toString()
-    .slice(-4)}</h4>
+        <h4 style="color:${color}">🚑 Unit #${id.toString().slice(-4)}</h4>
         <p><b>Tujuan:</b> ${rsName}</p>
-        <p><i class="fas fa-route"></i> Sisa Jarak: <span id="dist-${id}">Menghitung...</span></p>
-        <p class="status-text" id="status-${id}">Sedang Meluncur...</p>
+        <p><i class="fas fa-route"></i> Sisa Jarak: <span id="dist-${id}">...</span></p>
+        <p class="status-text" id="status-${id}">Meluncur...</p>
     `;
-
   container.appendChild(card);
 }
 
 function animateMarker(marker, pathCoordinates, simData) {
   let detailedPath = [];
   const steps = 3;
-
-  // Interpolasi (Haluskan jalur)
   for (let i = 0; i < pathCoordinates.length - 1; i++) {
     const start = pathCoordinates[i];
     const end = pathCoordinates[i + 1];
@@ -218,59 +284,32 @@ function animateMarker(marker, pathCoordinates, simData) {
   }
 
   let index = 0;
-
   simData.timer = setInterval(() => {
-    // A. Cek Apakah Sudah Sampai?
     if (index >= detailedPath.length) {
       clearInterval(simData.timer);
       marker.bindPopup("<b>Sampai di Tujuan!</b>").openPopup();
 
-      // Update Kartu: Status Sampai
       const statusText = document.getElementById(`status-${simData.id}`);
       if (statusText) {
         statusText.innerText = "TIBA DI LOKASI";
         statusText.style.color = "green";
-        statusText.style.fontWeight = "900";
       }
-
-      // Hapus kartu otomatis setelah 3 detik (biar layar bersih)
       setTimeout(() => {
         const card = document.getElementById(`card-${simData.id}`);
         if (card) card.remove();
-      }, 5000); // 5 detik delay hapus
-
+      }, 5000);
       return;
     }
+    marker.setLatLng(detailedPath[index]);
 
-    // B. Gerakkan Marker
-    const currentPos = detailedPath[index];
-    marker.setLatLng(currentPos);
-
-    // C. HITUNG & UPDATE JARAK DI KARTU UI
-    // Kita hitung jarak dari posisi marker sekarang ke tujuan akhir (garis lurus/haversine leafet)
-    const distMeters = map.distance(currentPos, simData.destination);
-    const distKm = (distMeters / 1000).toFixed(2); // Ubah ke KM (2 desimal)
-
+    // Update Jarak UI
+    const distMeters = map.distance(detailedPath[index], simData.destination);
+    const distKm = (distMeters / 1000).toFixed(2);
     const distElement = document.getElementById(`dist-${simData.id}`);
-    if (distElement) {
-      distElement.innerText = `${distKm} km`;
-    }
+    if (distElement) distElement.innerText = `${distKm} km`;
 
     index++;
   }, 50);
-}
-function clearSimulations() {
-  activeSimulations.forEach((sim) => {
-    map.removeLayer(sim.marker);
-    map.removeLayer(sim.line);
-    clearInterval(sim.timer);
-
-    // Hapus Elemen Kartu HTML
-    const card = document.getElementById(`card-${sim.id}`);
-    if (card) card.remove();
-  });
-  activeSimulations = [];
-  document.getElementById("btn-reset").style.display = "none";
 }
 
 // --- 4. INTEGRASI CUACA ---
@@ -319,6 +358,8 @@ legend.onAdd = function (map) {
     '<i style="background: red; width: 10px; height: 10px; display: inline-block; border-radius: 50%; margin-right: 5px;"></i> RS Rujukan Utama<br>';
   div.innerHTML +=
     '<i style="background: green; width: 10px; height: 10px; display: inline-block; border-radius: 50%; margin-right: 5px;"></i> RS Lainnya<br>';
+  div.innerHTML +=
+    '<i style="background: #f1c40f; opacity:0.5; width: 10px; height: 10px; display: inline-block; margin-right: 5px;"></i> Wilayah Kecamatan<br>';
   div.innerHTML += '<hr style="margin: 5px 0;">';
   div.innerHTML +=
     '<i style="border-top: 2px solid #7f8c8d; width: 20px; display: inline-block; margin-right: 5px;"></i> Jalan Raya<br>';
