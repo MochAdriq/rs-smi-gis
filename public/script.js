@@ -1,9 +1,3 @@
-/**
- * FILE: public/script.js
- * UPDATE: Support file .geojson & Layering Kecamatan
- */
-
-// --- 1. SETUP PETA & GLOBAL VARIABLES ---
 const map = L.map("map").setView([-6.921, 106.925], 13);
 
 const osmLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -19,30 +13,23 @@ const topoLayer = L.tileLayer(
   }
 );
 
-// Setup Layer Control (Menu Ganti Layer)
-// Kita simpan di variabel agar bisa menambah overlay secara dinamis nanti
 const baseMaps = {
   "Peta Jalan (OSM)": osmLayer,
   "Topografi (DEM)": topoLayer,
 };
-const overlayMaps = {}; // Nanti diisi otomatis saat data dimuat
+const overlayMaps = {};
 const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
-// Icon & Variables
-// --- KONFIGURASI ICON AMBULANS RANDOM ---
-
-// 1. Daftar nama file yang ada di folder public/assets
 const ambulanceImages = ["amb_1.svg", "amb_2.svg", "amb_3.svg"];
 
-// 2. Fungsi memilih icon secara acak
 function getRandomAmbIcon() {
   const randomIndex = Math.floor(Math.random() * ambulanceImages.length);
   const selectedImage = ambulanceImages[randomIndex];
 
   return L.icon({
-    iconUrl: `/assets/${selectedImage}`, // Path ke folder assets
-    iconSize: [45, 45], // Ukuran ikon
-    iconAnchor: [22, 22], // Titik tengah
+    iconUrl: `/assets/${selectedImage}`,
+    iconSize: [45, 45],
+    iconAnchor: [22, 22],
   });
 }
 
@@ -51,12 +38,7 @@ let weatherApiKey = "";
 let isSimulationMode = false;
 let activeSimulations = [];
 
-// --- 2. FUNGSI LOAD SEMUA LAYER DATA ---
-// --- 2. FUNGSI LOAD SEMUA LAYER DATA ---
 async function loadLayerData() {
-  // A. LAYER 1: KECAMATAN (Polygon) - Paling Bawah
-  // (Fitur Hover / Sorot Interaktif)
-  // A. LAYER 1: KECAMATAN (Polygon) - Paling Bawah
   try {
     const resKec = await fetch("/data/kecamatan.geojson");
     if (resKec.ok) {
@@ -73,16 +55,11 @@ async function loadLayerData() {
       const layerKecamatan = L.geoJSON(dataKec, {
         style: kecStyle,
         onEachFeature: function (feature, layer) {
-          // 1. Ambil Data Nama & Populasi
           const namaKec = feature.properties.nm_kecamatan || "Kecamatan";
 
-          // Ambil populasi, jika tidak ada tulis "0"
-          // Kita format angka biar ada titiknya (misal: 45.000)
           const rawPop = feature.properties.populasi || 0;
           const popFmt = rawPop.toLocaleString("id-ID");
 
-          // 2. Pasang Tooltip dengan HTML (Nama + Populasi)
-          // Kita pakai <br> untuk baris baru
           layer.bindTooltip(
             `
                         <div style="text-align:center;">
@@ -97,7 +74,6 @@ async function loadLayerData() {
             }
           );
 
-          // 3. Event Listener (Hover Effect)
           layer.on({
             mouseover: function (e) {
               if (isSimulationMode) return;
@@ -131,7 +107,6 @@ async function loadLayerData() {
     console.error("Gagal load kecamatan:", e);
   }
 
-  // B. LAYER 2: JALAN RAYA (Line) - Di Atas Kecamatan
   try {
     const resJalan = await fetch("/data/jalan_raya.geojson");
     if (resJalan.ok) {
@@ -153,13 +128,11 @@ async function loadLayerData() {
     console.error("Gagal load jalan:", e);
   }
 
-  // C. LAYER 3: RUMAH SAKIT (Point) - Paling Atas
   try {
     const resRS = await fetch("/data/rumah_sakit.json");
     if (resRS.ok) {
       allHospitals = await resRS.json();
 
-      // Kita bungkus dalam LayerGroup agar bisa di on/off sekaligus
       const groupRS = L.layerGroup();
 
       allHospitals.forEach((rs) => {
@@ -173,7 +146,6 @@ async function loadLayerData() {
           radius: 1000,
         });
 
-        // Masukkan ke grup
         marker.addTo(groupRS);
         circle.addTo(groupRS);
       });
@@ -187,11 +159,7 @@ async function loadLayerData() {
   }
 }
 
-// Panggil Fungsi Load
 loadLayerData();
-
-// --- 3. FITUR SIMULASI ON-DEMAND (KLIK USER) ---
-// (Bagian ini tidak berubah, tetap sama seperti sebelumnya)
 
 function toggleSimulationMode() {
   isSimulationMode = !isSimulationMode;
@@ -216,7 +184,6 @@ function clearSimulations() {
     map.removeLayer(sim.line);
     clearInterval(sim.timer);
 
-    // Hapus Kartu UI
     const card = document.getElementById(`card-${sim.id}`);
     if (card) card.remove();
   });
@@ -256,7 +223,6 @@ function findNearestHospital(lat, lng) {
   return nearest;
 }
 
-// Logika Routing OSRM & UI Panel
 async function getRouteAndAnimate(startLat, startLng, endLat, endLng, rsName) {
   const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
 
@@ -355,7 +321,6 @@ function animateMarker(marker, pathCoordinates, simData) {
     }
     marker.setLatLng(detailedPath[index]);
 
-    // Update Jarak UI
     const distMeters = map.distance(detailedPath[index], simData.destination);
     const distKm = (distMeters / 1000).toFixed(2);
     const distElement = document.getElementById(`dist-${simData.id}`);
@@ -373,30 +338,24 @@ async function fetchWeather() {
 
     if (!weatherApiKey) return;
 
-    // Koordinat Sukabumi (-6.9210, 106.9250)
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=-6.9210&lon=106.9250&appid=${weatherApiKey}&units=metric&lang=id`;
 
     const response = await fetch(url);
     const data = await response.json();
 
     if (data.cod === 200) {
-      // 1. Lokasi (Nama Daerah)
-      // Kadang API balikin "Sukabumi", kadang nama kecamatan. Kita ambil saja.
       document.getElementById("w-loc").innerText = data.name;
 
-      // 2. Suhu & Deskripsi
       document.getElementById("w-temp").innerText =
         Math.round(data.main.temp) + "°C";
       document.getElementById("w-desc").innerText = data.weather[0].description;
 
-      // 3. Ikon Cuaca
       const iconCode = data.weather[0].icon;
       const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
       const iconImg = document.getElementById("w-icon");
       iconImg.src = iconUrl;
       iconImg.style.display = "block";
 
-      // 4. Detail Tambahan (Angin & Lembap)
       document.getElementById("w-wind").innerText = data.wind.speed + " km/j";
       document.getElementById("w-hum").innerText = data.main.humidity + "%";
     }
@@ -407,7 +366,6 @@ async function fetchWeather() {
 }
 fetchWeather();
 
-// --- 5. LEGENDA PETA ---
 const legend = L.control({ position: "bottomright" });
 legend.onAdd = function (map) {
   const div = L.DomUtil.create("div", "info legend");

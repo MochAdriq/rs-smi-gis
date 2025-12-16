@@ -49,12 +49,11 @@ h3 {
   color: #27ae60;
   font-weight: bold;
 }
-/* ... CSS lama ... */
 
 .simulation-controls {
   position: absolute;
   top: 10px;
-  left: 50px; /* Posisi di kiri atas (sebelah zoom control) */
+  left: 50px;
   z-index: 1000;
   display: flex;
   gap: 10px;
@@ -77,60 +76,54 @@ h3 {
   transform: translateY(-2px);
 }
 
-/* Kelas khusus saat mode aktif */
 .mode-active {
-  background-color: #27ae60 !important; /* Jadi Hijau */
+  background-color: #27ae60 !important;
   border: 2px solid white;
 }
 
-/* Ubah kursor saat mode simulasi aktif */
 .cursor-crosshair {
   cursor: crosshair !important;
 }
 
-/* --- RESPONSIVE MOBILE --- */
 @media (max-width: 600px) {
   .info-panel {
     width: auto;
     left: 10px;
-    right: 10px; /* Panel melebar penuh */
+    right: 10px;
     top: auto;
-    bottom: 20px; /* Pindah ke bawah */
+    bottom: 20px;
   }
 
   .simulation-controls {
     top: 10px;
     left: 10px;
-    flex-direction: column; /* Tombol jadi vertikal */
+    flex-direction: column;
   }
 
-  /* Sembunyikan legenda di HP jika terlalu sempit (opsional) */
   .leaflet-bottom.leaflet-right {
     display: none;
   }
 }
-/* CONTAINER DAFTAR AMBULANS */
 .ambulance-list-container {
   position: absolute;
   bottom: 30px;
-  left: 10px; /* Pojok Kiri Bawah */
+  left: 10px;
   z-index: 1000;
   width: 250px;
   max-height: 400px;
-  overflow-y: auto; /* Scroll kalau kebanyakan */
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* KARTU INDIVIDU */
 .amb-card {
   background: rgba(255, 255, 255, 0.95);
   padding: 10px;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   font-family: "Segoe UI", sans-serif;
-  border-left: 5px solid #333; /* Warna default, nanti diubah JS */
+  border-left: 5px solid #333;
   transition: all 0.3s;
   animation: slideIn 0.3s ease-out;
 }
@@ -151,10 +144,9 @@ h3 {
 
 .amb-card .status-text {
   font-weight: bold;
-  color: #e67e22; /* Oranye saat jalan */
+  color: #e67e22;
 }
 
-/* Animasi Masuk */
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -166,7 +158,6 @@ h3 {
   }
 }
 
-/* Styling Label Kecamatan saat Hover */
 .leaflet-tooltip.kec-tooltip {
   background-color: rgba(0, 0, 0, 0.8);
   border: none;
@@ -178,7 +169,6 @@ h3 {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-/* Hilangkan panah tooltip bawaan leaflet biar rapi */
 .leaflet-tooltip-top:before,
 .leaflet-tooltip-bottom:before,
 .leaflet-tooltip-left:before,
@@ -186,7 +176,6 @@ h3 {
   display: none;
 }
 
-/* --- WIDGET CUACA BARU --- */
 .weather-widget {
   background: linear-gradient(to bottom right, #3498db, #2980b9);
   color: white;
