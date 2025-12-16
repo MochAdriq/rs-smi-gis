@@ -1,0 +1,50 @@
+[
+  {
+    "nama": "RSUD R. Syamsudin, S.H.",
+    "loc": [-6.91963, 106.92765],
+    "kelas": "Kelas B (Pendidikan)",
+    "kapasitas": "±566 Bed",
+    "status": "Rujukan Utama & BLUD",
+    "color": "red"
+  },
+  {
+    "nama": "RS Islam Assyifa",
+    "loc": [-6.91575, 106.9324],
+    "kelas": "Kelas C",
+    "kapasitas": "±180 Bed",
+    "status": "RS Swasta Terakreditasi",
+    "color": "green"
+  },
+  {
+    "nama": "RS Bhayangkara Setukpa",
+    "loc": [-6.9123, 106.9231],
+    "kelas": "Kelas C",
+    "kapasitas": "±88 Bed",
+    "status": "RS Kepolisian",
+    "color": "blue"
+  },
+  {
+    "nama": "RSUD Al-Mulk",
+    "loc": [-6.945, 106.93],
+    "kelas": "Kelas D",
+    "kapasitas": "±50 Bed",
+    "status": "RSUD Kota (Gratis KTP)",
+    "color": "orange"
+  },
+  {
+    "nama": "RS Kartika Kasih",
+    "loc": [-6.9235, 106.9298],
+    "kelas": "Kelas C",
+    "kapasitas": "±97 Bed",
+    "status": "RS Swasta (Kasih Group)",
+    "color": "purple"
+  },
+  {
+    "nama": "RS Hermina Sukabumi",
+    "loc": [-6.932, 106.955],
+    "kelas": "Kelas C",
+    "kapasitas": "±154 Bed",
+    "status": "RS Swasta Rujukan",
+    "color": "teal"
+  }
+]

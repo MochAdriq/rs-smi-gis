@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebGIS Pro Sukabumi</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="info-panel">
+      <h3><i class="fas fa-hospital-alt"></i> Dashboard Pro</h3>
+
+      <div class="data-group">
+        <div class="label">Cuaca Live</div>
+        <div class="weather-box">
+          <img id="w-icon" src="" style="width: 50px; display: none" />
+          <div>
+            <div id="w-temp" class="value">-</div>
+            <div id="w-desc" style="font-size: 0.9em">Loading...</div>
+          </div>
+        </div>
+      </div>
+      <hr />
+      <div class="data-group">
+        <div class="label">Status Database</div>
+        <div id="status" class="value status-active">Connecting...</div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between">
+        <div class="data-group">
+          <div class="label">Kecepatan</div>
+          <div class="value"><span id="speed">0</span> km/j</div>
+        </div>
+        <div class="data-group">
+          <div class="label">Update DB</div>
+          <div class="value" id="time" style="font-size: 0.8em">-</div>
+        </div>
+      </div>
+    </div>
+    <div class="simulation-controls">
+      <button id="btn-mode" onclick="toggleSimulationMode()">
+        <i class="fas fa-plus-circle"></i> Mode Tambah Ambulans
+      </button>
+
+      <button
+        id="btn-reset"
+        onclick="clearSimulations()"
+        style="display: none; background-color: #c0392b"
+      >
+        <i class="fas fa-trash"></i> Reset Peta
+      </button>
+    </div>
+
+    <div id="ambulance-list" class="ambulance-list-container"></div>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

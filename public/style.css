@@ -1,0 +1,167 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", sans-serif;
+}
+#map {
+  height: 100vh;
+  width: 100%;
+}
+
+.info-panel {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  width: 300px;
+}
+h3 {
+  margin-top: 0;
+  color: #2c3e50;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
+}
+.data-group {
+  margin-bottom: 15px;
+}
+.label {
+  font-size: 0.85em;
+  color: #7f8c8d;
+}
+.value {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #2c3e50;
+}
+.weather-box {
+  background: #e3f2fd;
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.status-active {
+  color: #27ae60;
+  font-weight: bold;
+}
+/* ... CSS lama ... */
+
+.simulation-controls {
+  position: absolute;
+  top: 10px;
+  left: 50px; /* Posisi di kiri atas (sebelah zoom control) */
+  z-index: 1000;
+  display: flex;
+  gap: 10px;
+}
+
+.simulation-controls button {
+  padding: 10px 15px;
+  background-color: #2980b9;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s;
+}
+
+.simulation-controls button:hover {
+  background-color: #3498db;
+  transform: translateY(-2px);
+}
+
+/* Kelas khusus saat mode aktif */
+.mode-active {
+  background-color: #27ae60 !important; /* Jadi Hijau */
+  border: 2px solid white;
+}
+
+/* Ubah kursor saat mode simulasi aktif */
+.cursor-crosshair {
+  cursor: crosshair !important;
+}
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 600px) {
+  .info-panel {
+    width: auto;
+    left: 10px;
+    right: 10px; /* Panel melebar penuh */
+    top: auto;
+    bottom: 20px; /* Pindah ke bawah */
+  }
+
+  .simulation-controls {
+    top: 10px;
+    left: 10px;
+    flex-direction: column; /* Tombol jadi vertikal */
+  }
+
+  /* Sembunyikan legenda di HP jika terlalu sempit (opsional) */
+  .leaflet-bottom.leaflet-right {
+    display: none;
+  }
+}
+/* CONTAINER DAFTAR AMBULANS */
+.ambulance-list-container {
+  position: absolute;
+  bottom: 30px;
+  left: 10px; /* Pojok Kiri Bawah */
+  z-index: 1000;
+  width: 250px;
+  max-height: 400px;
+  overflow-y: auto; /* Scroll kalau kebanyakan */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* KARTU INDIVIDU */
+.amb-card {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  font-family: "Segoe UI", sans-serif;
+  border-left: 5px solid #333; /* Warna default, nanti diubah JS */
+  transition: all 0.3s;
+  animation: slideIn 0.3s ease-out;
+}
+
+.amb-card h4 {
+  margin: 0 0 5px 0;
+  font-size: 0.95em;
+  color: #2c3e50;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 3px;
+}
+
+.amb-card p {
+  margin: 2px 0;
+  font-size: 0.85em;
+  color: #7f8c8d;
+}
+
+.amb-card .status-text {
+  font-weight: bold;
+  color: #e67e22; /* Oranye saat jalan */
+}
+
+/* Animasi Masuk */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

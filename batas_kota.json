@@ -1,0 +1,21 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "nama": "Wilayah Kota Sukabumi", "kepadatan": "Tinggi" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [106.9, -6.9],
+            [106.96, -6.9],
+            [106.96, -6.95],
+            [106.9, -6.95],
+            [106.9, -6.9]
+          ]
+        ]
+      }
+    }
+  ]
+}
